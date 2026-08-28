@@ -18,7 +18,7 @@ const JUDGMENT_META = {
   blunder: { icon: '??', label: 'Blunder', cls: 'j-blunder' },
 };
 
-export default function Review() {
+export default function Review({ active = true }) {
   const [pgn, setPgn] = useState(null);
   const [focusColor, setFocusColor] = useState('');
   const [progress, setProgress] = useState(null);
@@ -31,6 +31,7 @@ export default function Review() {
   const [diveBusy, setDiveBusy] = useState(false);
 
   useEffect(() => {
+    if (!active) return;
     const pending = sessionStorage.getItem('cm.pendingPgn');
     if (pending) {
       setPgn(pending);
@@ -38,7 +39,7 @@ export default function Review() {
       sessionStorage.removeItem('cm.pendingPgn');
       sessionStorage.removeItem('cm.pendingColor');
     }
-  }, []);
+  }, [active]);
 
   useEffect(() => {
     if (!pgn) return;
@@ -68,6 +69,7 @@ export default function Review() {
   );
 
   useEffect(() => {
+    if (!active) return;
     const onKey = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft') goto(ply - 1);
@@ -75,7 +77,7 @@ export default function Review() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [ply, goto]);
+  }, [ply, goto, active]);
 
   const squareStyles = useMemo(() => {
     if (!current) return {};

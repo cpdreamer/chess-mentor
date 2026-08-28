@@ -1,11 +1,22 @@
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Review from './pages/Review.jsx';
 import Play from './pages/Play.jsx';
 import Puzzles from './pages/Puzzles.jsx';
 import Settings from './pages/Settings.jsx';
 
+// All pages stay mounted so in-progress games, analyses, and chats
+// survive navigating between tabs; only the active one is displayed.
+const PAGES = [
+  ['/', Home],
+  ['/review', Review],
+  ['/play', Play],
+  ['/puzzles', Puzzles],
+  ['/settings', Settings],
+];
+
 export default function App() {
+  const { pathname } = useLocation();
   return (
     <div className="app">
       <nav className="topnav">
@@ -19,13 +30,14 @@ export default function App() {
         <NavLink to="/settings">Settings</NavLink>
       </nav>
       <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/review" element={<Review />} />
-          <Route path="/play" element={<Play />} />
-          <Route path="/puzzles" element={<Puzzles />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+        {PAGES.map(([path, Page]) => {
+          const active = pathname === path;
+          return (
+            <div key={path} style={{ display: active ? undefined : 'none' }}>
+              <Page active={active} />
+            </div>
+          );
+        })}
       </main>
     </div>
   );
