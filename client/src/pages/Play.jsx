@@ -79,6 +79,25 @@ export default function Play() {
     return true;
   };
 
+  const takeBack = () => {
+    if (thinking) return;
+    const game = gameRef.current;
+    if (game.history().length === 0) return;
+    // Undo back to the player's previous turn (usually AI reply + player move).
+    let undone = 0;
+    while (game.history().length > 0 && (undone === 0 || game.turn() !== playerColor)) {
+      game.undo();
+      undone++;
+    }
+    setFen(game.fen());
+    setLog((l) => l.slice(0, l.length - undone));
+    setStatus(null);
+    api
+      .post('/api/eval', { fen: game.fen(), depth: 10 })
+      .then((d) => setEvalInfo({ cp: d.cp, winPercent: d.winPercent }))
+      .catch(() => {});
+  };
+
   const newGame = (color) => {
     const game = new Chess();
     gameRef.current = game;
@@ -115,6 +134,9 @@ export default function Play() {
         <div className="board-controls">
           <button onClick={() => newGame('w')}>New game as White</button>
           <button onClick={() => newGame('b')}>New game as Black</button>
+          <button onClick={takeBack} disabled={thinking || log.length === 0}>
+            ↩ Take back
+          </button>
           <label>
             Level{' '}
             <select value={level} onChange={(e) => setLevel(Number(e.target.value))}>
