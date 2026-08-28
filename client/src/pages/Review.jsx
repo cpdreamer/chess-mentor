@@ -6,6 +6,8 @@ import CoachChat from '../components/CoachChat.jsx';
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
+const playerName = (name, fallback) => (name && name !== '?' ? name : fallback);
+
 const JUDGMENT_META = {
   great: { icon: '★', label: 'Great', cls: 'j-great' },
   best: { icon: '✓', label: 'Best', cls: 'j-best' },
@@ -75,14 +77,6 @@ export default function Review() {
     return () => window.removeEventListener('keydown', onKey);
   }, [ply, goto]);
 
-  const arrows = useMemo(() => {
-    if (!current || !current.bestMoveUci) return [];
-    if (current.judgment === 'best' || current.judgment === 'great') return [];
-    // Show what should have been played, from the position before the move? We show fenAfter,
-    // so instead highlight the played move squares via styles and skip arrows here.
-    return [];
-  }, [current]);
-
   const squareStyles = useMemo(() => {
     if (!current) return {};
     const color =
@@ -105,8 +99,14 @@ export default function Review() {
     if (!current || diveBusy) return;
     setDiveBusy(true);
     try {
-      const { text } = await api.post('/api/explain', { move: current });
-      setDeepDive((d) => ({ ...d, [current.ply]: text }));
+      const { text, ruleBased } = await api.post('/api/explain', { move: current });
+      setDeepDive((d) => ({
+        ...d,
+        [current.ply]:
+          ruleBased && comment
+            ? 'Deeper explanations need an AI provider — add a free Gemini API key in Settings.'
+            : text,
+      }));
     } catch (e) {
       setDeepDive((d) => ({ ...d, [current.ply]: `Error: ${e.message}` }));
     } finally {
@@ -141,7 +141,6 @@ export default function Review() {
                 boardOrientation: orientation,
                 allowDragging: false,
                 squareStyles,
-                arrows,
                 id: 'review-board',
               }}
             />
@@ -159,10 +158,10 @@ export default function Review() {
         {analysis && (
           <div className="accuracy-row">
             <span>
-              ♔ {analysis.header.White || 'White'}: <b>{analysis.accuracy.white}%</b>
+              ♔ {playerName(analysis.header.White, 'White')}: <b>{analysis.accuracy.white}%</b>
             </span>
             <span>
-              ♚ {analysis.header.Black || 'Black'}: <b>{analysis.accuracy.black}%</b>
+              ♚ {playerName(analysis.header.Black, 'Black')}: <b>{analysis.accuracy.black}%</b>
             </span>
           </div>
         )}
