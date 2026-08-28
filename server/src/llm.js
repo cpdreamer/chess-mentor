@@ -75,10 +75,14 @@ function retryDelayMs(error) {
   return m ? Math.min(90_000, Math.ceil(parseFloat(m[1]) * 1000) + 1000) : 30_000;
 }
 
+// Higher free-tier quota than the flash models; used only when rate-limited.
+const GEMINI_FALLBACK_MODEL = 'gemini-3.5-flash-lite';
+
 export async function chat(messages, opts = {}) {
   const s = getSettings();
-  const call = () => {
-    if (s.provider === 'gemini' && s.geminiApiKey) return callGemini(s, messages, opts);
+  const call = (model) => {
+    if (s.provider === 'gemini' && s.geminiApiKey)
+      return callGemini(model ? { ...s, geminiModel: model } : s, messages, opts);
     if (s.provider === 'openai' && s.openaiApiKey) return callOpenAi(s, messages, opts);
     throw new LlmError(
       'No AI provider configured. Add a free Gemini API key (or an OpenAI key) in Settings.'
@@ -90,7 +94,16 @@ export async function chat(messages, opts = {}) {
       return await call();
     } catch (e) {
       const delay = e instanceof LlmError ? retryDelayMs(e) : null;
-      if (delay == null || attempt >= 2) throw e;
+      if (delay == null) throw e;
+      // Rate-limited: try the higher-quota lite model once before waiting.
+      if (s.provider === 'gemini' && s.geminiModel !== GEMINI_FALLBACK_MODEL) {
+        try {
+          return await call(GEMINI_FALLBACK_MODEL);
+        } catch {
+          // fall through to waiting for the main model's quota
+        }
+      }
+      if (attempt >= 2) throw e;
       await sleep(delay);
     }
   }

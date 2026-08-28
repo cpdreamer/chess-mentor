@@ -16,6 +16,7 @@ export default function Play() {
   const [evalInfo, setEvalInfo] = useState({ cp: 0, winPercent: 50 });
   const [status, setStatus] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [explainMoves, setExplainMoves] = useState(true);
   const [gameId, setGameId] = useState(0);
   const logRef = useRef(null);
 
@@ -41,6 +42,7 @@ export default function Play() {
         fen: game.fen(),
         level,
         playerLastSan,
+        explain: explainMoves,
       });
       if (data.gameOver && !data.move) {
         checkGameOver(game);
@@ -146,6 +148,14 @@ export default function Play() {
               <option value={4}>4 — Strong</option>
               <option value={5}>5 — Maximum</option>
             </select>
+          </label>
+          <label title="Turning this off saves AI quota — you can still ask the coach anything in chat">
+            <input
+              type="checkbox"
+              checked={explainMoves}
+              onChange={(e) => setExplainMoves(e.target.checked)}
+            />{' '}
+            AI explains its moves
           </label>
         </div>
         {status && <p className="status">{status}</p>}
