@@ -15,6 +15,12 @@ RUN npm ci --prefix client
 COPY . .
 RUN npm run build --prefix client
 
+# Run as a non-root user with a writable home (required by Hugging Face Spaces).
+RUN chown -R node:node /app
+USER node
+ENV HOME=/home/node
+
 ENV NODE_ENV=production
-EXPOSE 3001
+ENV PORT=7860
+EXPOSE 7860
 CMD ["node", "server/src/index.js"]
