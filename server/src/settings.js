@@ -8,7 +8,7 @@ const FILE = path.join(DIR, 'settings.json');
 const DEFAULTS = {
   provider: process.env.LLM_PROVIDER || 'gemini', // 'gemini' | 'openai' | 'none'
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: 'gemini-2.0-flash',
+  geminiModel: 'gemini-3.6-flash',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   openaiModel: 'gpt-4o-mini',
   openaiBaseUrl: 'https://api.openai.com/v1',
