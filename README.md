@@ -57,3 +57,13 @@ A `Dockerfile` and `render.yaml` are included, so you can deploy it to [Render](
 
 - Your settings and API key are stored locally in `~/.chess-mentor/settings.json` and never leave your machine (the key is only sent to Google/OpenAI when generating explanations).
 - Analysis depth is configurable in Settings (deeper = more accurate but slower).
+
+## Updating
+
+From the app folder, run:
+
+```bash
+npm run update
+```
+
+This downloads the latest version from GitHub and applies it in place (your settings, API key, and Stockfish are kept). Requires the repository to be public. Then start the app again with `npm run dev`.
