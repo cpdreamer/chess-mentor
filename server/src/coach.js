@@ -1,4 +1,32 @@
+import { Chess } from 'chess.js';
 import { chat, extractJson, llmAvailable, LlmError } from './llm.js';
+
+const PIECE_NAMES = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+
+// Plain-English description of the position so the model doesn't have to
+// decode FEN itself (LLMs frequently misread FEN strings).
+export function describePosition(fen) {
+  try {
+    const game = new Chess(fen);
+    const pieces = { w: [], b: [] };
+    for (const row of game.board()) {
+      for (const sq of row) {
+        if (sq) pieces[sq.color].push(`${PIECE_NAMES[sq.type]} on ${sq.square}`);
+      }
+    }
+    const lines = [
+      `White pieces: ${pieces.w.join(', ')}.`,
+      `Black pieces: ${pieces.b.join(', ')}.`,
+      `${game.turn() === 'w' ? 'White' : 'Black'} to move.`,
+    ];
+    if (game.inCheck()) lines.push(`${game.turn() === 'w' ? 'White' : 'Black'} is in check.`);
+    const legal = game.moves();
+    lines.push(`Legal moves: ${legal.join(', ')}.`);
+    return lines.join('\n');
+  } catch {
+    return '';
+  }
+}
 
 const evalStr = (cp) => {
   if (Math.abs(cp) >= 9000) {
@@ -76,6 +104,7 @@ For great/best moves at key moments: explain the idea that makes them strong.
 // Explain a single move / position in depth.
 export async function explainMove(move, question, history) {
   const context = `Position (FEN before the move): ${move.fenBefore}
+${describePosition(move.fenBefore)}
 Move played: ${move.san} (judged: ${move.judgment})
 Eval: ${evalStr(move.cpBefore)} -> ${evalStr(move.cpAfter)}
 Engine's best move: ${move.bestMoveSan || 'n/a'}${move.bestLineSan?.length ? `, best line: ${move.bestLineSan.join(' ')}` : ''}${move.secondLineSan?.length ? `\nSecond-best line: ${move.secondLineSan.join(' ')}` : ''}`;
@@ -103,7 +132,7 @@ export async function chatAboutPosition({ fen, engineSummary, history = [], ques
     { role: 'system', content: COACH_SYSTEM },
     {
       role: 'user',
-      content: `We are discussing this chess position (FEN): ${fen}\nEngine analysis: ${engineSummary}\n\nAnswer my questions about this position concisely and concretely. Earlier messages in our conversation may refer to previous positions in the same game — the FEN above is the current position.`,
+      content: `We are discussing this chess position (FEN): ${fen}\n${describePosition(fen)}\nEngine analysis: ${engineSummary}\n\nBase everything you say strictly on the piece placement and legal moves listed above — never assume a piece is on a square not listed. Answer my questions about this position concisely and concretely. Earlier messages in our conversation may refer to previous positions in the same game — the position above is the current one.`,
     },
     { role: 'assistant', content: 'Sure — ask me anything about this position.' },
   ];
@@ -114,7 +143,8 @@ export async function chatAboutPosition({ fen, engineSummary, history = [], ques
 
 // Explain the AI's own move in play mode.
 export async function explainAiMove({ fenBefore, moveSan, evalAfterCp, bestLineSan, playerLastSan }) {
-  const prompt = `You are playing a friendly training game. ${playerLastSan ? `Your opponent (the student) just played ${playerLastSan}. ` : ''}In this position (FEN): ${fenBefore}, you played ${moveSan}. Engine eval after your move: ${evalStr(evalAfterCp)}. Your planned follow-up line: ${bestLineSan?.join(' ') || 'n/a'}.
+  const prompt = `You are playing a friendly training game. ${playerLastSan ? `Your opponent (the student) just played ${playerLastSan}. ` : ''}In this position (FEN): ${fenBefore}, you played ${moveSan}.
+${describePosition(fenBefore)} Engine eval after your move: ${evalStr(evalAfterCp)}. Your planned follow-up line: ${bestLineSan?.join(' ') || 'n/a'}.
 
 In 2-4 sentences, explain to your opponent the intuition behind ${moveSan}: what it aims for (development, a threat, a positional idea), and what you're watching in their position. Speak directly to them, like a sparring coach.`;
   return chat([
