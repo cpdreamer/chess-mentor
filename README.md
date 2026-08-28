@@ -48,6 +48,16 @@ Open **http://localhost:5173** in your browser. That's it.
 
 Without a key, you still get full Stockfish analysis, the eval bar, accuracy scores, and rule-based explanations — the AI coach features (rich explanations, chat, play-mode commentary) unlock once a key is added. OpenAI or any OpenAI-compatible API (e.g. a local Ollama) works too.
 
+## Host it online (free, via Render)
+
+Instead of running it locally, you can deploy it to [Render](https://render.com)'s free tier so it's just a link you open:
+
+1. Create a free Render account (no card needed) and connect your GitHub.
+2. On the dashboard, click **New → Blueprint**, pick this repository, and click **Deploy** — the included `render.yaml` + `Dockerfile` handle everything (Stockfish included).
+3. Optionally set the `GEMINI_API_KEY` environment variable on the service to enable AI coaching (recommended on Render, since settings saved in the app's Settings page reset on redeploys/restarts there).
+
+Notes: the free instance sleeps when idle (first load takes up to a minute) and analysis is slower than on your own PC.
+
 ## Notes
 
 - Your settings and API key are stored locally in `~/.chess-mentor/settings.json` and never leave your machine (the key is only sent to Google/OpenAI when generating explanations).

@@ -6,10 +6,10 @@ const DIR = path.join(os.homedir(), '.chess-mentor');
 const FILE = path.join(DIR, 'settings.json');
 
 const DEFAULTS = {
-  provider: 'gemini', // 'gemini' | 'openai' | 'none'
-  geminiApiKey: '',
+  provider: process.env.LLM_PROVIDER || 'gemini', // 'gemini' | 'openai' | 'none'
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: 'gemini-2.0-flash',
-  openaiApiKey: '',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
   openaiModel: 'gpt-4o-mini',
   openaiBaseUrl: 'https://api.openai.com/v1',
   chesscomUsername: '',
