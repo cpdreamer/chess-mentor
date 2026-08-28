@@ -51,7 +51,7 @@ function uciToSan(fen, uci) {
   }
 }
 
-function pvToSan(fen, pv, maxLen = 6) {
+export function pvToSan(fen, pv, maxLen = 6) {
   const c = new Chess(fen);
   const sans = [];
   for (const uci of pv.slice(0, maxLen)) {

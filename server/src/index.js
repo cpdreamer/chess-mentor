@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Chess } from 'chess.js';
-import { analyzeGame, winPercent } from './analyze.js';
+import { analyzeGame, winPercent, pvToSan } from './analyze.js';
 import { withEngine } from './engine.js';
 import { fetchRecentGames } from './chesscom.js';
 import { getSettings, saveSettings, maskedSettings } from './settings.js';
@@ -145,7 +145,7 @@ app.post(
     const summary = result.lines
       .map((l) => {
         const score = l.scoreMate != null ? `mate in ${l.scoreMate}` : `${(l.scoreCp / 100).toFixed(1)} (side to move)`;
-        return `${l.moves.slice(0, 6).join(' ')} (${score})`;
+        return `${pvToSan(fen, l.moves).join(' ')} (${score})`;
       })
       .join(' | ');
     const text = await chatAboutPosition({ fen, engineSummary: summary || 'game over', history, question });
