@@ -208,7 +208,9 @@ export default function Puzzles() {
                 Ask the coach
               </button>
             </div>
-            {showChat && <CoachChat fen={fen || puzzle.fen} key={fen || puzzle.fen} />}
+            <div style={{ display: showChat ? undefined : 'none' }}>
+              <CoachChat fen={fen || puzzle.fen} key={puzzle.id} />
+            </div>
           </div>
         )}
       </div>

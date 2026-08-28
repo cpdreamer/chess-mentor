@@ -260,14 +260,12 @@ export default function Review() {
               </div>
             )}
 
-            {tab === 'chat' && (
-              <div className="card">
-                <p className="muted">
-                  Chatting about the position after {ply === 0 ? 'the start' : `move ${ply}`}.
-                </p>
-                <CoachChat fen={fen} key={fen} />
-              </div>
-            )}
+            <div className="card" style={{ display: tab === 'chat' ? undefined : 'none' }}>
+              <p className="muted">
+                Chatting about the position after {ply === 0 ? 'the start' : `move ${ply}`}.
+              </p>
+              <CoachChat fen={fen} />
+            </div>
           </>
         )}
       </div>

@@ -16,6 +16,7 @@ export default function Play() {
   const [evalInfo, setEvalInfo] = useState({ cp: 0, winPercent: 50 });
   const [status, setStatus] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [gameId, setGameId] = useState(0);
   const logRef = useRef(null);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function Play() {
     setLog([]);
     setStatus(null);
     setEvalInfo({ cp: 0, winPercent: 50 });
+    setGameId((id) => id + 1);
     if (color === 'b') aiMove(game, null);
   };
 
@@ -155,11 +157,9 @@ export default function Play() {
             ))}
           </div>
         )}
-        {showChat && (
-          <div className="card">
-            <CoachChat fen={fen} key={fen} />
-          </div>
-        )}
+        <div className="card" style={{ display: showChat ? undefined : 'none' }}>
+          <CoachChat fen={fen} key={gameId} />
+        </div>
       </div>
     </div>
   );

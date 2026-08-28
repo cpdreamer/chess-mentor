@@ -103,7 +103,7 @@ export async function chatAboutPosition({ fen, engineSummary, history = [], ques
     { role: 'system', content: COACH_SYSTEM },
     {
       role: 'user',
-      content: `We are discussing this chess position (FEN): ${fen}\nEngine analysis: ${engineSummary}\n\nAnswer my questions about this position concisely and concretely.`,
+      content: `We are discussing this chess position (FEN): ${fen}\nEngine analysis: ${engineSummary}\n\nAnswer my questions about this position concisely and concretely. Earlier messages in our conversation may refer to previous positions in the same game — the FEN above is the current position.`,
     },
     { role: 'assistant', content: 'Sure — ask me anything about this position.' },
   ];
