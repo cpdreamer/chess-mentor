@@ -67,13 +67,33 @@ export function llmAvailable() {
   return false;
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function retryDelayMs(error) {
+  if (!/\(429\)/.test(error.message)) return null;
+  const m = error.message.match(/retry in ([\d.]+)s/i);
+  return m ? Math.min(90_000, Math.ceil(parseFloat(m[1]) * 1000) + 1000) : 30_000;
+}
+
 export async function chat(messages, opts = {}) {
   const s = getSettings();
-  if (s.provider === 'gemini' && s.geminiApiKey) return callGemini(s, messages, opts);
-  if (s.provider === 'openai' && s.openaiApiKey) return callOpenAi(s, messages, opts);
-  throw new LlmError(
-    'No AI provider configured. Add a free Gemini API key (or an OpenAI key) in Settings.'
-  );
+  const call = () => {
+    if (s.provider === 'gemini' && s.geminiApiKey) return callGemini(s, messages, opts);
+    if (s.provider === 'openai' && s.openaiApiKey) return callOpenAi(s, messages, opts);
+    throw new LlmError(
+      'No AI provider configured. Add a free Gemini API key (or an OpenAI key) in Settings.'
+    );
+  };
+  // Retry rate-limited requests (free tiers have per-minute quotas).
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await call();
+    } catch (e) {
+      const delay = e instanceof LlmError ? retryDelayMs(e) : null;
+      if (delay == null || attempt >= 2) throw e;
+      await sleep(delay);
+    }
+  }
 }
 
 export function extractJson(text) {
