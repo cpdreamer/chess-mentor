@@ -48,15 +48,19 @@ Open **http://localhost:5173** in your browser. That's it.
 
 Without a key, you still get full Stockfish analysis, the eval bar, accuracy scores, and rule-based explanations — the AI coach features (rich explanations, chat, play-mode commentary) unlock once a key is added. OpenAI or any OpenAI-compatible API (e.g. a local Ollama) works too.
 
-## Host it online (free, via Render)
+## Run it in the cloud with GitHub Codespaces (free, no installs)
 
-Instead of running it locally, you can deploy it to [Render](https://render.com)'s free tier so it's just a link you open:
+No installs needed — run it in your browser:
 
-1. Create a free Render account (no card needed) and connect your GitHub.
-2. On the dashboard, click **New → Blueprint**, pick this repository, and click **Deploy** — the included `render.yaml` + `Dockerfile` handle everything (Stockfish included).
-3. Optionally set the `GEMINI_API_KEY` environment variable on the service to enable AI coaching (recommended on Render, since settings saved in the app's Settings page reset on redeploys/restarts there).
+1. Open <https://codespaces.new/cpdreamer/chess-mentor> and click **Create codespace** (first start takes a few minutes to build).
+2. When it's ready, the app opens automatically — or click the **Ports** tab and open the forwarded port 3001 link.
+3. Next time, resume the same codespace from <https://github.com/codespaces> (starts much faster).
 
-Notes: the free instance sleeps when idle (first load takes up to a minute) and analysis is slower than on your own PC.
+GitHub's free plan includes ~60 hours/month, and the codespace stops automatically when idle.
+
+## Host it on a server (via Render or any Docker host)
+
+A `Dockerfile` and `render.yaml` are included, so you can deploy it to [Render](https://render.com), or any host that runs Docker containers. Set the `GEMINI_API_KEY` environment variable on the service to enable AI coaching (recommended for hosts with ephemeral disks, where settings saved in the app's Settings page reset on restarts).
 
 ## Notes
 

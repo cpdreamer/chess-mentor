@@ -1,0 +1,16 @@
+{
+  "name": "Chess Mentor",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y stockfish && npm install && npm run setup && npm run build",
+  "postStartCommand": "nohup npm start > /tmp/chess-mentor.log 2>&1 &",
+  "forwardPorts": [3001],
+  "portsAttributes": {
+    "3001": {
+      "label": "Chess Mentor",
+      "onAutoForward": "openBrowserOnce"
+    }
+  },
+  "remoteEnv": {
+    "STOCKFISH_PATH": "/usr/games/stockfish"
+  }
+}
