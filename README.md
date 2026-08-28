@@ -12,23 +12,14 @@ Everything runs on your own computer. The only external services used are chess.
 
 ## Setup (one time)
 
-You need [Node.js](https://nodejs.org) (v18+) and Stockfish installed:
-
-```bash
-# Ubuntu/Debian
-sudo apt install stockfish
-# macOS
-brew install stockfish
-# Windows: download from https://stockfishchess.org/download/ and set the
-# STOCKFISH_PATH environment variable to the .exe location
-```
-
-Then, in this folder:
+You need [Node.js](https://nodejs.org) (v18+). Then, in this folder:
 
 ```bash
 npm install
 npm run setup
 ```
+
+That's everything — setup auto-downloads the right Stockfish binary for your platform (Windows/macOS/Linux) into `server/bin/`. If the download fails, install Stockfish from <https://stockfishchess.org/download/> and set the `STOCKFISH_PATH` environment variable to it.
 
 ## Run it
 

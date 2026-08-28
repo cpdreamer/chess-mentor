@@ -5,7 +5,7 @@
   "description": "Personal chess coach: unlimited AI game review, chess.com import, play vs AI, puzzles",
   "type": "module",
   "scripts": {
-    "setup": "npm install --prefix server && npm install --prefix client",
+    "setup": "npm install --prefix server && npm install --prefix client && node scripts/get-stockfish.mjs",
     "dev": "concurrently -n server,client -c blue,green \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "build": "npm run build --prefix client",
     "start": "npm run start --prefix server",

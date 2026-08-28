@@ -1,13 +1,28 @@
 import { spawn } from 'child_process';
 import os from 'os';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOCAL_BIN = path.join(__dirname, '../bin');
 
 const STOCKFISH_PATHS = [
   process.env.STOCKFISH_PATH,
+  path.join(LOCAL_BIN, 'stockfish.exe'),
+  path.join(LOCAL_BIN, 'stockfish'),
   '/usr/games/stockfish',
   '/usr/local/bin/stockfish',
   '/usr/bin/stockfish',
   'stockfish',
 ].filter(Boolean);
+
+function resolveStockfish() {
+  for (const p of STOCKFISH_PATHS) {
+    if (p === 'stockfish' || fs.existsSync(p)) return p;
+  }
+  return null;
+}
 
 export class Engine {
   constructor() {
@@ -18,16 +33,12 @@ export class Engine {
   }
 
   async start() {
-    let lastErr;
-    for (const path of STOCKFISH_PATHS) {
-      try {
-        this.proc = spawn(path);
-        break;
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-    if (!this.proc) throw lastErr || new Error('Stockfish not found');
+    const bin = resolveStockfish();
+    if (!bin)
+      throw new Error(
+        'Stockfish not found. Run `npm run setup` (auto-downloads it) or set STOCKFISH_PATH.'
+      );
+    this.proc = spawn(bin);
     this.proc.on('error', (e) => {
       console.error('Stockfish process error:', e.message);
     });
