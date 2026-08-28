@@ -1,9 +1,29 @@
+import { Component } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Review from './pages/Review.jsx';
 import Play from './pages/Play.jsx';
 import Puzzles from './pages/Puzzles.jsx';
 import Settings from './pages/Settings.jsx';
+
+// Isolates crashes so a rendering error in one page can't blank the whole app.
+class PageBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="card">
+          <p className="status">Something went wrong on this page: {String(this.state.error?.message || this.state.error)}</p>
+          <button onClick={() => this.setState({ error: null })}>Try again</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // All pages stay mounted so in-progress games, analyses, and chats
 // survive navigating between tabs; only the active one is displayed.
@@ -34,7 +54,9 @@ export default function App() {
           const active = pathname === path;
           return (
             <div key={path} style={{ display: active ? undefined : 'none' }}>
-              <Page active={active} />
+              <PageBoundary>
+                <Page active={active} />
+              </PageBoundary>
             </div>
           );
         })}
