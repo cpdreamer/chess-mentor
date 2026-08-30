@@ -8,7 +8,7 @@ Your personal chess coach — like chess.com's Game Review, but **unlimited, fre
 - **Puzzles**: unlimited tactics puzzles (from Lichess's free database) with AI explanations of the theme, the solution, and why your wrong tries fail.
 - **Ask the coach**: chat about any position, anywhere in the app.
 
-Everything runs on your own computer. The only external services used are chess.com's public game API, Lichess's public puzzle API, and (optionally) a free Gemini API key for the AI explanations.
+Everything runs on your own computer. The only external services used are chess.com's public game API, Lichess's public puzzle API, and (optionally) a free Groq or Gemini API key for the AI explanations (Groq: create a key at https://console.groq.com/keys — highest free limits; Gemini: https://aistudio.google.com/apikey).
 
 ## Setup (one time)
 

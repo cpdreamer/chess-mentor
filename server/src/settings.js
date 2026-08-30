@@ -6,9 +6,11 @@ const DIR = path.join(os.homedir(), '.chess-mentor');
 const FILE = path.join(DIR, 'settings.json');
 
 const DEFAULTS = {
-  provider: process.env.LLM_PROVIDER || 'gemini', // 'gemini' | 'openai' | 'none'
+  provider: process.env.LLM_PROVIDER || 'gemini', // 'gemini' | 'groq' | 'openai' | 'none'
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: 'gemini-3.6-flash',
+  groqApiKey: process.env.GROQ_API_KEY || '',
+  groqModel: 'openai/gpt-oss-120b',
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   openaiModel: 'gpt-4o-mini',
   openaiBaseUrl: 'https://api.openai.com/v1',
@@ -38,8 +40,10 @@ export function maskedSettings() {
   return {
     ...s,
     geminiApiKey: mask(s.geminiApiKey),
+    groqApiKey: mask(s.groqApiKey),
     openaiApiKey: mask(s.openaiApiKey),
     hasGeminiKey: Boolean(s.geminiApiKey),
+    hasGroqKey: Boolean(s.groqApiKey),
     hasOpenaiKey: Boolean(s.openaiApiKey),
   };
 }

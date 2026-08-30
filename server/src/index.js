@@ -35,6 +35,8 @@ app.post('/api/settings', (req, res) => {
     'provider',
     'geminiApiKey',
     'geminiModel',
+    'groqApiKey',
+    'groqModel',
     'openaiApiKey',
     'openaiModel',
     'openaiBaseUrl',
@@ -46,7 +48,7 @@ app.post('/api/settings', (req, res) => {
     if (req.body[k] !== undefined && req.body[k] !== null) partial[k] = req.body[k];
   }
   // Don't overwrite stored keys with the masked placeholder.
-  for (const k of ['geminiApiKey', 'openaiApiKey']) {
+  for (const k of ['geminiApiKey', 'groqApiKey', 'openaiApiKey']) {
     if (typeof partial[k] === 'string' && partial[k].includes('...')) delete partial[k];
   }
   saveSettings(partial);

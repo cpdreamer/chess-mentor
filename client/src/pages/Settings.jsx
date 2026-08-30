@@ -33,22 +33,46 @@ export default function Settings() {
       <section className="card">
         <h2>AI coach</h2>
         <p className="muted">
-          The coach uses a language model to explain moves. <b>Google Gemini has a free tier</b> —
-          create a free key at{' '}
+          The coach uses a language model to explain moves. Two good free options:{' '}
+          <b>Groq</b> (generous free limits, ~1,000 requests/day — create a free key at{' '}
+          <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">
+            console.groq.com/keys
+          </a>
+          ) and <b>Google Gemini</b> (best writing quality, tighter limits — key at{' '}
           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
             aistudio.google.com/apikey
-          </a>{' '}
-          (sign in with Google → “Create API key”) and paste it below. Without a key you still get
-          full Stockfish analysis with basic explanations.
+          </a>
+          ). Without a key you still get full Stockfish analysis with basic explanations.
         </p>
         <label>
           Provider
           <select value={settings.provider} onChange={(e) => update('provider', e.target.value)}>
+            <option value="groq">Groq (free — highest free limits)</option>
             <option value="gemini">Google Gemini (free tier available)</option>
             <option value="openai">OpenAI (or compatible)</option>
             <option value="none">None — engine-only explanations</option>
           </select>
         </label>
+
+        {settings.provider === 'groq' && (
+          <>
+            <label>
+              Groq API key {settings.hasGroqKey && <span className="badge badge-won">key saved</span>}
+              <input
+                type="password"
+                placeholder={settings.hasGroqKey ? settings.groqApiKey : 'gsk_…'}
+                onChange={(e) => update('groqApiKey', e.target.value)}
+              />
+            </label>
+            <label>
+              Model
+              <input
+                value={settings.groqModel}
+                onChange={(e) => update('groqModel', e.target.value)}
+              />
+            </label>
+          </>
+        )}
 
         {settings.provider === 'gemini' && (
           <>

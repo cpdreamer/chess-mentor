@@ -60,9 +60,24 @@ async function callOpenAi(settings, messages, { json = false } = {}) {
   return text;
 }
 
+const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
+
+function callGroq(settings, messages, opts, model) {
+  return callOpenAi(
+    {
+      openaiApiKey: settings.groqApiKey,
+      openaiModel: model || settings.groqModel,
+      openaiBaseUrl: GROQ_BASE_URL,
+    },
+    messages,
+    opts
+  );
+}
+
 export function llmAvailable() {
   const s = getSettings();
   if (s.provider === 'gemini') return Boolean(s.geminiApiKey);
+  if (s.provider === 'groq') return Boolean(s.groqApiKey);
   if (s.provider === 'openai') return Boolean(s.openaiApiKey);
   return false;
 }
@@ -71,23 +86,31 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function retryDelayMs(error) {
   if (!/\(429\)/.test(error.message)) return null;
-  const m = error.message.match(/retry in ([\d.]+)s/i);
+  const m = error.message.match(/(?:retry|try again) in ([\d.]+)s/i);
   return m ? Math.min(90_000, Math.ceil(parseFloat(m[1]) * 1000) + 1000) : 30_000;
 }
 
-// Higher free-tier quota than the flash models; used only when rate-limited.
+// Higher free-tier quotas than the primary models; used only when rate-limited.
 const GEMINI_FALLBACK_MODEL = 'gemini-3.5-flash-lite';
+const GROQ_FALLBACK_MODEL = 'llama-3.1-8b-instant';
 
 export async function chat(messages, opts = {}) {
   const s = getSettings();
   const call = (model) => {
     if (s.provider === 'gemini' && s.geminiApiKey)
       return callGemini(model ? { ...s, geminiModel: model } : s, messages, opts);
+    if (s.provider === 'groq' && s.groqApiKey) return callGroq(s, messages, opts, model);
     if (s.provider === 'openai' && s.openaiApiKey) return callOpenAi(s, messages, opts);
     throw new LlmError(
-      'No AI provider configured. Add a free Gemini API key (or an OpenAI key) in Settings.'
+      'No AI provider configured. Add a free Groq or Gemini API key in Settings.'
     );
   };
+  const fallbackModel =
+    s.provider === 'gemini' && s.geminiModel !== GEMINI_FALLBACK_MODEL
+      ? GEMINI_FALLBACK_MODEL
+      : s.provider === 'groq' && s.groqModel !== GROQ_FALLBACK_MODEL
+        ? GROQ_FALLBACK_MODEL
+        : null;
   // Retry rate-limited requests (free tiers have per-minute quotas).
   for (let attempt = 0; ; attempt++) {
     try {
@@ -95,10 +118,10 @@ export async function chat(messages, opts = {}) {
     } catch (e) {
       const delay = e instanceof LlmError ? retryDelayMs(e) : null;
       if (delay == null) throw e;
-      // Rate-limited: try the higher-quota lite model once before waiting.
-      if (s.provider === 'gemini' && s.geminiModel !== GEMINI_FALLBACK_MODEL) {
+      // Rate-limited: try a higher-quota model once before waiting.
+      if (fallbackModel) {
         try {
-          return await call(GEMINI_FALLBACK_MODEL);
+          return await call(fallbackModel);
         } catch {
           // fall through to waiting for the main model's quota
         }
