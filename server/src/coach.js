@@ -102,8 +102,8 @@ For great/best moves at key moments: explain the idea that makes them strong.
 }
 
 // Explain a single move / position in depth.
-export async function explainMove(move, question, history) {
-  const context = `Position (FEN before the move): ${move.fenBefore}
+export async function explainMove(move, question, history, movesSoFar) {
+  const context = `${movesSoFar ? `Game so far (moves leading to this position): ${movesSoFar}\n\n` : ''}Position (FEN before the move): ${move.fenBefore}
 ${describePosition(move.fenBefore)}
 Move played: ${move.san} (judged: ${move.judgment})
 Eval: ${evalStr(move.cpBefore)} -> ${evalStr(move.cpAfter)}
@@ -127,12 +127,12 @@ Engine's best move: ${move.bestMoveSan || 'n/a'}${move.bestLineSan?.length ? `, 
 }
 
 // Free-form chat about a position (used in review chat + play mode chat).
-export async function chatAboutPosition({ fen, engineSummary, history = [], question }) {
+export async function chatAboutPosition({ fen, engineSummary, history = [], question, movesSoFar }) {
   const messages = [
     { role: 'system', content: COACH_SYSTEM },
     {
       role: 'user',
-      content: `We are discussing this chess position (FEN): ${fen}\n${describePosition(fen)}\nEngine analysis: ${engineSummary}\n\nBase everything you say strictly on the piece placement and legal moves listed above — never assume a piece is on a square not listed. Answer my questions about this position concisely and concretely. Earlier messages in our conversation may refer to previous positions in the same game — the position above is the current one.`,
+      content: `We are discussing this chess position (FEN): ${fen}\n${movesSoFar ? `Moves played in the game so far: ${movesSoFar}\n` : ''}${describePosition(fen)}\nEngine analysis: ${engineSummary}\n\nBase everything you say strictly on the piece placement and legal moves listed above — never assume a piece is on a square not listed. Answer my questions about this position concisely and concretely. Earlier messages in our conversation may refer to previous positions in the same game — the position above is the current one.`,
     },
     { role: 'assistant', content: 'Sure — ask me anything about this position.' },
   ];

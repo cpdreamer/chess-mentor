@@ -125,10 +125,10 @@ app.post(
 app.post(
   '/api/explain',
   asyncRoute(async (req, res) => {
-    const { move, question, history } = req.body;
+    const { move, question, history, movesSoFar } = req.body;
     if (!move) return res.status(400).json({ error: 'move is required' });
     if (!llmAvailable()) return res.json({ text: ruleBasedComment(move), ruleBased: true });
-    const text = await explainMove(move, question, history);
+    const text = await explainMove(move, question, history, movesSoFar);
     res.json({ text });
   })
 );
@@ -137,7 +137,7 @@ app.post(
 app.post(
   '/api/chat',
   asyncRoute(async (req, res) => {
-    const { fen, question, history } = req.body;
+    const { fen, question, history, movesSoFar } = req.body;
     if (!fen || !question) return res.status(400).json({ error: 'fen and question are required' });
     if (!llmAvailable())
       return res
@@ -150,7 +150,7 @@ app.post(
         return `${pvToSan(fen, l.moves).join(' ')} (${score})`;
       })
       .join(' | ');
-    const text = await chatAboutPosition({ fen, engineSummary: summary || 'game over', history, question });
+    const text = await chatAboutPosition({ fen, engineSummary: summary || 'game over', history, question, movesSoFar });
     res.json({ text });
   })
 );

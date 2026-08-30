@@ -58,7 +58,7 @@ export default function Review({ active = true }) {
     }).catch((e) => setError(e.message));
   }, [pgn, focusColor]);
 
-  const moves = analysis?.moves || [];
+  const moves = useMemo(() => analysis?.moves || [], [analysis]);
   const current = ply > 0 ? moves[ply - 1] : null;
   const fen = current ? current.fenAfter : START_FEN;
   const orientation = focusColor === 'b' ? 'black' : 'white';
@@ -97,11 +97,28 @@ export default function Review({ active = true }) {
 
   const comment = current && review?.comments?.[String(current.ply)];
 
+  // Numbered SAN move list up to the current ply, so the coach knows the game flow.
+  const movesSoFar = useMemo(
+    () =>
+      moves
+        .slice(0, ply)
+        .map((m) => (m.color === 'w' ? `${m.moveNumber}. ${m.san}` : m.san))
+        .join(' '),
+    [moves, ply]
+  );
+
   const explainMore = async () => {
     if (!current || diveBusy) return;
     setDiveBusy(true);
     try {
-      const { text, ruleBased } = await api.post('/api/explain', { move: current });
+      const movesBefore = moves
+        .slice(0, current.ply - 1)
+        .map((m) => (m.color === 'w' ? `${m.moveNumber}. ${m.san}` : m.san))
+        .join(' ');
+      const { text, ruleBased } = await api.post('/api/explain', {
+        move: current,
+        movesSoFar: movesBefore,
+      });
       setDeepDive((d) => ({
         ...d,
         [current.ply]:
@@ -266,7 +283,7 @@ export default function Review({ active = true }) {
               <p className="muted">
                 Chatting about the position after {ply === 0 ? 'the start' : `move ${ply}`}.
               </p>
-              <CoachChat fen={fen} />
+              <CoachChat fen={fen} movesSoFar={movesSoFar} />
             </div>
           </>
         )}

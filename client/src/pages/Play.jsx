@@ -190,7 +190,13 @@ export default function Play() {
           </div>
         )}
         <div className="card" style={{ display: showChat ? undefined : 'none' }}>
-          <CoachChat fen={fen} key={gameId} />
+          <CoachChat
+            fen={fen}
+            movesSoFar={log
+              .map((entry, i) => (i % 2 === 0 ? `${i / 2 + 1}. ${entry.san}` : entry.san))
+              .join(' ')}
+            key={gameId}
+          />
         </div>
       </div>
     </div>

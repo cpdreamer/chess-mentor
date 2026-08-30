@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { api } from '../api.js';
 
 // Chat with the AI coach about a specific position (FEN).
-export default function CoachChat({ fen, seed = [] }) {
+export default function CoachChat({ fen, movesSoFar = '', seed = [] }) {
   const [messages, setMessages] = useState(seed);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -22,7 +22,7 @@ export default function CoachChat({ fen, seed = [] }) {
     setMessages((ms) => [...ms, { role: 'user', content: question }]);
     setBusy(true);
     try {
-      const { text } = await api.post('/api/chat', { fen, question, history });
+      const { text } = await api.post('/api/chat', { fen, question, history, movesSoFar });
       setMessages((ms) => [...ms, { role: 'assistant', content: text }]);
     } catch (e) {
       setError(e.message);
